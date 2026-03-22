@@ -68,11 +68,11 @@ async def upload_grades(file: UploadFile = File(...)):
         "students": 0
         }
     
-    sql_query = '''INSERT INTO marks (record_date, group_number, full_name, grade)
+    insert_query = '''INSERT INTO marks (record_date, group_number, full_name, grade)
                    VALUES ($1, $2, $3, $4)'''
     
     async with get_db() as connection:
-        await connection.executemany(sql_query, marks_to_insert)
+        await connection.executemany(insert_query, marks_to_insert)
         return {
             "status": "ok",
             "records_loaded": len(marks_to_insert),
@@ -81,7 +81,14 @@ async def upload_grades(file: UploadFile = File(...)):
     
 @app.get("/students/more-than-3-twos")
 async def analysis1():
-    pass
+    async with get_db() as connection:
+        rows = await connection.fetch('SELECT full_name, COUNT(*) as count_twos FROM marks WHERE grade = 2 GROUP BY full_name HAVING COUNT(*) > 3')
+        result = []
+        for row in rows:
+            result.append(
+                {"full_name": row["full_name"], "count_twos": row["grade"]}
+            )
+        return result
 
 @app.get("/students/less-than-5-twos")
 async def analysis2():
