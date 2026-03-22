@@ -91,4 +91,10 @@ async def analysis1():
 
 @app.get("/students/less-than-5-twos")
 async def analysis2():
-    pass
+    async with get_db() as connection:
+        rows = await connection.fetch('''SELECT full_name, COUNT(*) FILTER (WHERE grade = 2) AS count_twos FROM marks
+                                        GROUP BY full_name HAVING COUNT(*) FILTER (WHERE grade = 2) < 5;''')
+        result = []
+        for row in rows:
+            result.append({"full_name": row["full_name"], "count_twos": row["count_twos"]})
+        return result
