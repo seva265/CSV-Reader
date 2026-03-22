@@ -78,3 +78,11 @@ async def upload_grades(file: UploadFile = File(...)):
             "records_loaded": len(marks_to_insert),
             "students": len(set([x[2] for x in marks_to_insert]))
             }
+    
+@app.get("/students/more-than-3-twos")
+async def analysis1():
+    pass
+
+@app.get("/students/less-than-5-twos")
+async def analysis2():
+    pass
