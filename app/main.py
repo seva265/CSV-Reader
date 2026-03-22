@@ -81,8 +81,8 @@ async def upload_grades(file: UploadFile = File(...)):
     
 @app.get("/students/more-than-3-twos")
 async def analysis1():
-    async with get_db() as connection:
-        rows = await connection.fetch('''SELECT full_name, COUNT(*) as count_twos FROM marks
+    async with get_db() as conn:
+        rows = await conn.fetch('''SELECT full_name, COUNT(*) as count_twos FROM marks
                                          WHERE grade = 2 GROUP BY full_name HAVING COUNT(*) > 3''')
         result = []
         for row in rows:
@@ -91,8 +91,8 @@ async def analysis1():
 
 @app.get("/students/less-than-5-twos")
 async def analysis2():
-    async with get_db() as connection:
-        rows = await connection.fetch('''SELECT full_name, COUNT(*) FILTER (WHERE grade = 2) AS count_twos FROM marks
+    async with get_db() as conn:
+        rows = await conn.fetch('''SELECT full_name, COUNT(*) FILTER (WHERE grade = 2) AS count_twos FROM marks
                                         GROUP BY full_name HAVING COUNT(*) FILTER (WHERE grade = 2) < 5;''')
         result = []
         for row in rows:
