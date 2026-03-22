@@ -82,12 +82,11 @@ async def upload_grades(file: UploadFile = File(...)):
 @app.get("/students/more-than-3-twos")
 async def analysis1():
     async with get_db() as connection:
-        rows = await connection.fetch('SELECT full_name, COUNT(*) as count_twos FROM marks WHERE grade = 2 GROUP BY full_name HAVING COUNT(*) > 3')
+        rows = await connection.fetch('''SELECT full_name, COUNT(*) as count_twos FROM marks
+                                         WHERE grade = 2 GROUP BY full_name HAVING COUNT(*) > 3''')
         result = []
         for row in rows:
-            result.append(
-                {"full_name": row["full_name"], "count_twos": row["grade"]}
-            )
+            result.append({"full_name": row["full_name"], "count_twos": row["count_twos"]})
         return result
 
 @app.get("/students/less-than-5-twos")
