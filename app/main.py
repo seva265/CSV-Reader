@@ -6,7 +6,7 @@ from datetime import datetime
 import asyncpg
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from contextlib import asynccontextmanager
-from database import init_pool, close_pool, get_db
+from app.database import init_pool, close_pool, get_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

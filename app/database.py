@@ -2,14 +2,14 @@ import os
 import asyncpg
 from fastapi import Depends
 from contextlib import asynccontextmanager
-from config import DB_URL
+from app.config import DB_URL
 
 db_pool = None
 
 async def run_scripts():
     assert db_pool is not None
     async with db_pool.acquire() as conn:
-        path = os.path.join(os.path.dirname(__file__), "sql", "001_init.sql")
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "001_init.sql")
         with open(path, 'r', encoding='utf-8') as f:
             sql = f.read()
         await conn.execute(sql)
