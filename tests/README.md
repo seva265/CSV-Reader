@@ -5,6 +5,7 @@
 ```
 tests/
 ├── conftest.py                 # Общие фикстуры для тестов
+├── fixtures.py                 # Фикстуры для работы с базой данных
 ├── test_upload_errors.py       # Тесты загрузки CSV файлов
 ├── test_database_errors.py     # Тесты ошибок базы данных
 └── test_analysis_endpoints.py  # Тесты аналитических эндпоинтов
@@ -12,15 +13,19 @@ tests/
 
 ## 🚀 Запуск тестов
 
-### Быстрый запуск
+### Быстрый запуск (рекомендуется)
 ```bash
-./run_tests.sh
+python scripts/run_tests.py
 ```
 
-### Ручной запуск
+### Через pytest напрямую
 ```bash
-source venv/bin/activate
-pytest tests/ -v
+python -m pytest tests/ -v
+```
+
+### Через Poetry
+```bash
+poetry run pytest tests/ -v
 ```
 
 ## Что проверяется
@@ -50,12 +55,12 @@ pytest tests/ -v
 ## 🔧 Конфигурация
 
 - `conftest.py` - фикстуры и общие настройки тестов
-- `run_tests.sh` - скрипт для быстрого запуска
+- `fixtures.py` - фикстуры для работы с реальной базой данных (используются при USE_REAL_DB=1)
 
 ## 📝 Зависимости
 
 Для тестирования используются:
 - `pytest` - фреймворк для тестирования
 - `pytest-asyncio` - поддержка асинхронных тестов
-- `httpx` - HTTP клиент для тестирования FastAPI
-- `pytest-cov` - измерение покрытия кода
+
+Зависимости указаны в `pyproject.toml` в секции `[tool.poetry.group.dev.dependencies]`.

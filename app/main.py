@@ -1,8 +1,3 @@
-import csv
-import codecs
-from datetime import datetime
-from typing import List
-
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.database import init_pool, close_pool
