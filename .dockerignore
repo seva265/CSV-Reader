@@ -1,3 +1,23 @@
+# python
+__pycache__/
+*.pyc
+
+# envs
+.env
+venv/
+.venv
+
+# git
+.git
+
+# tests / caches
+tests/__pycache__/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# macos
+.DS_Store
 __pycache__
 *.pyc
 *.pyo

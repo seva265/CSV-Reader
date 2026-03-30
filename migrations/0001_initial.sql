@@ -1,4 +1,4 @@
---создание таблицы при старте
+-- migration 0001: создание таблицы marks
 
 CREATE TABLE IF NOT EXISTS marks (
     id SERIAL PRIMARY KEY,
@@ -8,5 +8,4 @@ CREATE TABLE IF NOT EXISTS marks (
     grade INTEGER NOT NULL CHECK (grade >= 2 AND grade <= 5)
 );
 
---индекс для повышения производительности
 CREATE INDEX IF NOT EXISTS idx_marks_grade_name ON marks(grade, full_name);

@@ -1,169 +1,142 @@
 # Система управления оценками студентов
 
-FastAPI приложение для управления и анализа оценок студентов с использованием PostgreSQL базы данных.
+## Быстрый старт
 
-## Описание проекта
+1. скопируйте и заполните `.env` из `.env.example`.
+2. примените миграции:
 
-Данное приложение предоставляет REST API для:
-- Загрузки оценок студентов из CSV-файлов
-- Анализа успеваемости студентов
-- Хранения данных об оценках в PostgreSQL
-
-## Технологический стек
-
-- **Backend**: FastAPI 0.135.1
-- **База данных**: PostgreSQL 16
-- **Асинхронный драйвер**: asyncpg 0.31.0
-- **Контейнеризация**: Docker & Docker Compose
-- **Python**: 3.13.12
-
-## API Эндпоинты
-
-### POST `/upload-grades`
-Загрузка оценок из CSV-файла.
-
-**Формат CSV-файла:**
-- Разделитель: `;`
-- Обязательные заголовки: `Дата`, `Номер группы`, `ФИО`, `Оценка`
-- Формат даты: `ДД.ММ.ГГГГ`
-- Оценки: от 2 до 5
-
-**Пример CSV:**
-```csv
-Дата;Номер группы;ФИО;Оценка
-15.03.2024;ИТ-301;Иванов Иван Иванович;4
-15.03.2024;ИТ-301;Петров Петр Петрович;5
-```
-
-### GET `/students/more-than-3-twos`
-Получить список студентов, у которых более 3 двоек.
-
-**Ответ:**
-```json
-[
-  {
-    "full_name": "Иванов Иван Иванович",
-    "count_twos": 4
-  }
-]
-```
-
-### GET `/students/less-than-5-twos`
-Получить список студентов, у которых менее 5 двоек.
-
-**Ответ:**
-```json
-[
-  {
-    "full_name": "Петров Петр Петрович",
-    "count_twos": 2
-  }
-]
-```
-
-## Установка и запуск
-
-### 1. Клонирование репозитория
 ```bash
-git clone <repository-url>
-cd ecom_test
+# локально (с poetry)
+poetry run python scripts/migrate.py
+
+# или внутри контейнера
+docker-compose exec app python3 -c "import scripts.migrate as m; m.main()"
 ```
 
-### 2. Настройка окружения
-Скопируйте файл окружения и заполните данными:
+3. (опционально) загрузите сиды:
+
 ```bash
-cp .env.example .env
+poetry run python scripts/seed_db.py
 ```
 
-Отредактируйте `.env` файл:
-```env
-DB_USER=your_username
-DB_PASSWORD=your_password
-DB_NAME=your_database
-DB_HOST=localhost
-DB_PORT=5432
-```
+4. запустите сервис:
 
-### 3. Запуск с Docker Compose (рекомендуется)
 ```bash
-docker-compose up --build
-```
+## Быстрый старт (Docker)
 
-Приложение будет доступно по адресу: `http://localhost:8000`
-База данных: `localhost:5432`
+1. Установите Docker и docker-compose.
+2. Скопируйте `.env.example` в `.env` и при необходимости измените значения.
+3. Постройте и запустите сервисы:
 
-### 4. Запуск без Docker
-
-#### Установка зависимостей:
 ```bash
-pip install -r requirements.txt
+docker-compose up --build -d
 ```
 
-#### Настройка PostgreSQL:
-Создайте базу данных
+4. Примените миграции (если они не применяются автоматически):
 
-#### Запуск приложения:
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# внутри контейнера
+docker-compose exec app python3 scripts/migrate.py
+
+# или локально (через poetry)
+poetry run python scripts/migrate.py
 ```
+
+5. По желанию загрузите сиды (тестовые данные):
+
+```bash
+docker-compose exec app python3 scripts/seed_db.py
+```
+
+6. Документация API доступна по адресу:
+
+```
+http://localhost:8000/docs
+```
+
+7. Остановить сервисы:
+
+```bash
+docker-compose down
+```
+
+## Структура проекта
+
+- `app/` — источник приложения FastAPI:
+	- `app/main.py` — точка входа и регистрация роутеров;
+	- `app/database.py` — инициализация пула, помощники доступа к БД;
+	- `app/services.py` — бизнес-логика и SQL-запросы;
+	- `app/routers/` — маршруты API (grades, analysis);
+	- `app/schemas.py` — Pydantic-схемы для ответов/запросов;
+	- `app/config.py` — конфигурация окружения.
+- `migrations/` — SQL-файлы миграций; являются источником правды для схемы БД.
+- `seeds/` — сиды (тестовые данные), применяются явно через `scripts/seed_db.py`.
+- `scripts/` — вспомогательные утилиты:
+	- `migrate.py` — раннер миграций (помечает применённые в таблице `schema_migrations`);
+	- `seed_db.py` — применяет `seeds/seeds.sql`;
+	- `init_db.py` — обёртка/инициализатор (вызывает мигратор при необходимости).
+- `tests/` — набор pytest тестов и фикстур для проверки логики и ошибок.
+- `Dockerfile`, `docker-compose.yml` — образ и оркестрация контейнеров.
+- `pyproject.toml` — конфигурация Poetry и зависимости проекта.
+- `.env.example` — пример переменных окружения (скопируйте в `.env`).
+
+## Миграции
+
+- Все изменения схемы должны попадать в `migrations/` как отдельные `.sql` файлы, пронумерованные по порядку.
+- `scripts/migrate.py` применяет все новые файлы и записывает их в таблицу `schema_migrations`, чтобы не дублировать применение.
+- Не храните противоположные/дублирующие инициализационные дампы — `migrations/` должен быть единственным источником правды.
+
+## Сиды
+
+- Сиды находятся в `seeds/seeds.sql` и применяются вручную командой `scripts/seed_db.py`.
+- Скрипт `seed_db.py` использует `app.config.DB_URL` и подключается напрямую к базе.
 
 ## Тестирование
 
-### Запуск тестов
+- Локально (с Poetry):
+
 ```bash
-./run_tests.sh
+poetry install
+poetry run pytest -q
 ```
 
-### Ручной запуск
+- В контейнере:
+
 ```bash
-source venv/bin/activate
-pytest tests/ -v
+docker-compose exec app pytest -q
 ```
 
-### Покрытие тестов
-- 10 базовых тестов
-- Проверка основных сценариев ошибок
-- Моки для изоляции от базы данных
-- Тесты CSV загрузки, базы данных, аналитических эндпоинтов
+## Разработка локально
 
-## Документация API
+1. Установите Poetry (если не установлен):
 
-После запуска приложения доступна интерактивная документация:
-- Swagger UI: `http://localhost:8000/docs`
-
-## База данных
-
-### Таблица `marks`
-- `id` - SERIAL PRIMARY KEY
-- `record_date` - DATE (дата оценки)
-- `group_number` - VARCHAR(50) (номер группы)
-- `full_name` - VARCHAR(200) (ФИО студента)
-- `grade` - INTEGER (оценка от 2 до 5)
-
-### Индексы
-Создан индекс `idx_marks_grade_name` для повышения производительности запросов по оценкам и ФИО.
-
-## Примеры использования
-
-### Загрузка файла с оценками:
 ```bash
-curl -X POST "http://localhost:8000/upload-grades" \
-  -H "accept: application/json" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@grades.csv"
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-### Получение студентов с более чем 3 двойками:
+2. Установите зависимости и запустите сервис:
+
 ```bash
-curl -X GET "http://localhost:8000/students/more-than-3-twos"
+poetry install
+poetry run uvicorn app.main:app --reload
 ```
 
-## Особенности реализации
+## Полезные команды
 
-- Асинхронная работа с базой данных через `asyncpg`
-- Валидация CSV-файлов и данных
-- Автоматическое создание таблиц при старте
-- Health checks для Docker контейнеров
-- Обработка ошибок и валидация входных данных
-- Поддержка UTF-8 с BOM для CSV файлов
-- Комплексный набор тестов
+- Применить миграции локально: `poetry run python scripts/migrate.py`
+- Загрузить сиды: `poetry run python scripts/seed_db.py` или через `docker-compose exec app python3 scripts/seed_db.py`
+- Запустить тесты: `poetry run pytest` или `docker-compose exec app pytest`
+ - Запустить тесты: `poetry run pytest` или `docker-compose exec app pytest`
+- Через скрипт: `./scripts/run_tests.py` (автоматически использует Poetry / venv / python)
+
+## Примечания
+
+- Проект использует `asyncpg` для асинхронной работы с PostgreSQL (без ORM).
+- `migrations/` — единственный источник правды для схемы БД; старые инициализационные дампы были удалены.
+- Если нужно экспортировать `requirements.txt` для окружений без Poetry, используйте:
+
+```bash
+poetry export -f requirements.txt --without-hashes --output requirements.txt
+```
+
+Если хотите, я могу добавить простую CI конфигурацию (GitHub Actions) для прогонки тестов и применения миграций на PR.

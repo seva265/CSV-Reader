@@ -9,7 +9,7 @@ services:
     - POSTGRES_PASSWORD=${DB_PASSWORD}
     - POSTGRES_DB=${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_HOST=database
-      - DB_PORT=5432
+      - DB_PORT=${DB_PORT}
     depends_on:
       database:
         condition: service_healthy
