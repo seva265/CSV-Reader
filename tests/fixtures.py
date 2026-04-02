@@ -34,6 +34,6 @@ def apply_sql_file(path: str):
 def seed_db():
     """apply sql/seeds.sql to real db when USE_REAL_DB=1 is set"""
     if os.getenv("USE_REAL_DB") == "1":
-        path = Path(__file__).parent.parent / "sql" / "seeds.sql"
+        path = Path(__file__).parent / "seeds" / "seeds.sql"
         apply_sql_file(str(path))
     yield
