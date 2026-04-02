@@ -1,20 +1,5 @@
 from typing import List, Tuple, Dict, Any
 
-
-async def get_or_create_student(conn, full_name: str) -> int:
-    sid = await conn.fetchval('SELECT id FROM students WHERE full_name=$1', full_name)
-    if sid is None:
-        sid = await conn.fetchval('INSERT INTO students(full_name) VALUES($1) RETURNING id', full_name)
-    return sid
-
-
-async def get_or_create_group(conn, group_number: str) -> int:
-    gid = await conn.fetchval('SELECT id FROM groups WHERE group_number=$1', group_number)
-    if gid is None:
-        gid = await conn.fetchval('INSERT INTO groups(group_number) VALUES($1) RETURNING id', group_number)
-    return gid
-
-
 async def insert_marks(conn, marks: List[Tuple[Any, str, str, int]]) -> Tuple[int, int]:
     student_cache: Dict[str, int] = {}
     group_cache: Dict[str, int] = {}
